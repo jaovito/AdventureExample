@@ -3,6 +3,7 @@
 
 #include "Gun.h"
 
+#include "GunStateComponent.h"
 #include "GameFramework/Character.h"
 
 // Sets default values
@@ -56,5 +57,34 @@ void AGun::Pickup(ACharacter* Character)
 	if (Character)
 	{
 		AttachToComponent(Character->GetMesh(), AttachmentRules, TEXT("hand_rHandgun"));
+	}
+}
+
+inline void AGun::Shoot(FHitResult HitResult)
+{
+	if (ACharacter* Character = Cast<ACharacter>(GetOwner()))
+	{
+		if (UGunStateComponent* GunState = Character->FindComponentByClass<UGunStateComponent>())
+		{
+			if (GunState->CanShoot())
+			{
+				GunState->bIsShooting = true;
+			}
+		}
+		else
+		{
+			GunState->bIsShooting = false;
+		}
+	}
+	
+	if (IsValid(HitResult.GetActor()) && IsValid(ProjectileClass))
+	{
+		// spawn the projectile
+		FVector SpawnLocation = BulletProjectile->GetComponentLocation();
+		FRotator SpawnRotation = BulletProjectile->GetComponentRotation();
+		FActorSpawnParameters SpawnInfo;
+		SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		
+		GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnInfo);
 	}
 }

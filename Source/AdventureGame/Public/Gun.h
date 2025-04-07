@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Projectile.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
@@ -33,6 +34,9 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UArrowComponent* Shells;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Shooting")
+	TSubclassOf<AProjectile> ProjectileClass;
 	
 public:	
 	// Called every frame
@@ -40,4 +44,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Gun")
 	void Pickup(ACharacter* Character);
+
+	UFUNCTION(BlueprintCallable, Category = "Gun")
+	void Shoot(FHitResult HitResult);
 };
