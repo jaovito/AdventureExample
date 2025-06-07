@@ -1,0 +1,97 @@
+{
+    "rules": [
+        {
+            "name": "Unreal Engine C++ Header Organization",
+            "pattern": "**/*.h",
+            "rules": [
+                "GENERATED_BODY() deve estar logo após a declaração da classe",
+                "Incluir CoreMinimal.h como primeiro include",
+                "Organizar includes na seguinte ordem: Engine, Projeto, Terceiros",
+                "Manter UCLASS, UPROPERTY e UFUNCTION com indentação correta"
+            ]
+        },
+        {
+            "name": "Unreal Engine C++ Source Organization",
+            "pattern": "**/*.cpp",
+            "rules": [
+                "Incluir o header correspondente como primeiro include",
+                "Manter a ordem: includes, construtores, BeginPlay, Tick, funções públicas, funções protegidas, funções privadas",
+                "Usar UPROPERTY para variáveis que precisam ser expostas ao editor",
+                "Documentar funções BlueprintCallable e BlueprintPure"
+            ]
+        },
+        {
+            "name": "Unreal Engine Naming Conventions",
+            "pattern": "**/*.{h,cpp}",
+            "rules": [
+                "Classes: Prefixo U para componentes, A para Actors",
+                "Interfaces: Prefixo I",
+                "Enums: Prefixo E",
+                "Structs: Prefixo F",
+                "Templates: Prefixo T",
+                "Booleanos: Prefixo b",
+                "Variáveis UPROPERTY: Sem prefixo especial"
+            ]
+        },
+        {
+            "name": "Unreal Engine Code Style",
+            "pattern": "**/*.{h,cpp}",
+            "rules": [
+                "Usar tabs para indentação",
+                "Chaves em nova linha para funções e classes",
+                "Chaves na mesma linha para condicionais e loops",
+                "Espaço após palavras-chave (if, for, while)",
+                "Sem espaço após nomes de funções",
+                "Espaço após vírgulas em parâmetros"
+            ]
+        },
+        {
+            "name": "Unreal Engine Component Rules",
+            "pattern": "**/Components/*.{h,cpp}",
+            "rules": [
+                "Componentes devem herdar de UActorComponent",
+                "Usar UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))",
+                "Declarar OwnerCharacter no BeginPlay",
+                "Implementar BeginPlay e Tick quando necessário"
+            ]
+        },
+        {
+            "name": "Unreal Engine Blueprint Integration",
+            "pattern": "**/*.{h,cpp}",
+            "rules": [
+                "Usar BlueprintCallable para funções que podem ser chamadas do Blueprint",
+                "Usar BlueprintPure para funções que não modificam estado",
+                "Documentar parâmetros e retornos de funções Blueprint",
+                "Usar UPROPERTY(EditAnywhere) para variáveis editáveis no editor"
+            ]
+        },
+        {
+            "name": "Unreal Engine Performance",
+            "pattern": "**/*.{h,cpp}",
+            "rules": [
+                "Evitar alocações em Tick",
+                "Usar const para parâmetros que não são modificados",
+                "Usar referências para evitar cópias desnecessárias",
+                "Implementar BeginPlay e Tick apenas quando necessário"
+            ]
+        },
+        {
+            "name": "Unreal Engine Debug",
+            "pattern": "**/*.{h,cpp}",
+            "rules": [
+                "Usar GEngine->AddOnScreenDebugMessage para debug visual",
+                "Implementar DrawDebugHelpers para debug visual de geometria",
+                "Usar UE_LOG para logging estruturado",
+                "Incluir informações relevantes em mensagens de erro"
+            ]
+        }
+    ],
+    "ignore": [
+        "**/Intermediate/**",
+        "**/Saved/**",
+        "**/Binaries/**",
+        "**/DerivedDataCache/**",
+        "**/.vs/**",
+        "**/.idea/**"
+    ]
+}
