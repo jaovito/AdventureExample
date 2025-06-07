@@ -20,6 +20,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Cover")	
 	void ExitCover();
 
+
+	UFUNCTION(BlueprintCallable, Category = "Cover")
 	void MoveAlongCover(float Value);
 
 	UFUNCTION(BlueprintPure, Category = "Cover")
@@ -35,6 +37,9 @@ private:
 	FVector CoverNormal;
 
 	ACharacter* OwnerCharacter;
+
+	UPROPERTY(EditAnywhere, Category = "Cover")
+	float CoverMovementSpeed = 300.0f;
 
 	void AlignToCover();
 	bool FindCover(FVector& OutLocation, FVector& OutNormal);
