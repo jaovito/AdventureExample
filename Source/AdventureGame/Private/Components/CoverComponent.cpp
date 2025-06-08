@@ -10,8 +10,9 @@
 // Sets default values for this component's properties
 UCoverComponent::UCoverComponent()
 {
-    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.bCanEverTick = true;
     CurrentState = ECoverState::None;
+    bMovingToCover = false;
 }
 
 
@@ -21,10 +22,42 @@ void UCoverComponent::BeginPlay()
     OwnerCharacter = Cast<ACharacter>(GetOwner());
 }
 
+void UCoverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    
+    if (bMovingToCover && OwnerCharacter)
+    {
+        // Calcula a direção para o alvo
+        FVector CurrentLocation = OwnerCharacter->GetActorLocation();
+        FVector Direction = (TargetLocation - CurrentLocation);
+        float Distance = Direction.Size();
+        
+        // Se chegou perto o suficiente do alvo
+        if (Distance < 10.0f)
+        {
+            bMovingToCover = false;
+            CurrentState = ECoverState::InCover;
+            OwnerCharacter->SetActorLocation(TargetLocation);
+            OwnerCharacter->SetActorRotation(TargetRotation);
+        }
+        else
+        {
+            // Move na direção do alvo usando AddMovementInput
+            Direction.Normalize();
+            OwnerCharacter->AddMovementInput(Direction, 1.0f);
+            
+            // Rotação suave para o alvo
+            FRotator CurrentRotation = OwnerCharacter->GetActorRotation();
+            FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 5.0f);
+            OwnerCharacter->SetActorRotation(NewRotation);
+        }
+    }
+}
 
 void UCoverComponent::TryEnterCover() 
 {
-    if (CurrentState != ECoverState::None)
+    if (CurrentState != ECoverState::None || bMovingToCover)
         return;
 
 	FVector Location;
@@ -35,7 +68,6 @@ void UCoverComponent::TryEnterCover()
         CoverLocation = Location;
         CoverNormal = Normal;
         AlignToCover();
-        CurrentState = ECoverState::InCover;
 	}
 }
 
@@ -44,6 +76,11 @@ void UCoverComponent::ExitCover()
     if (CurrentState == ECoverState::InCover)
     {
         CurrentState = ECoverState::None;
+        bMovingToCover = false;
+        
+        // Para o Tick quando não está mais movendo
+        PrimaryComponentTick.bCanEverTick = false;
+        
 		UCharacterMovementComponent* OwnerMovement = OwnerCharacter->GetCharacterMovement();
         OwnerMovement->SetMovementMode(EMovementMode::MOVE_Walking);
         // OwnerCharacter->PlayCoverExitMontage(); // opcional
@@ -77,8 +114,15 @@ void UCoverComponent::AlignToCover()
     const FVector Forward = -CoverNormal; // olhando para a parede
     const FRotator TargetRot = Forward.Rotation();
 
-    OwnerCharacter->SetActorLocation(CoverLocation - Forward * 50.0f); // ajusta distância
-    OwnerCharacter->SetActorRotation(TargetRot);
+    // Define a posição e rotação alvo
+    TargetLocation = CoverLocation - Forward * 50.0f; // ajusta distância
+    TargetRotation = TargetRot;
+    
+    // Inicia o movimento fluído
+    bMovingToCover = true;
+    
+    // Garante que o Tick esteja ativo
+    PrimaryComponentTick.bCanEverTick = true;
 }
 
 bool UCoverComponent::IsInCover()
@@ -88,7 +132,7 @@ bool UCoverComponent::IsInCover()
 
 void UCoverComponent::MoveAlongCover(float Value)
 {
-    if (CurrentState != ECoverState::InCover || Value == 0.0f)
+    if (CurrentState != ECoverState::InCover || Value == 0.0f || bMovingToCover)
         return;
 
     // Calcula a direção paralela à parede usando o produto vetorial

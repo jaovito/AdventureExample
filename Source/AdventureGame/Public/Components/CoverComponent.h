@@ -14,12 +14,13 @@ class ADVENTUREGAME_API UCoverComponent : public UActorComponent
 public:	
 	UCoverComponent();
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 	UFUNCTION(BlueprintCallable, Category = "Cover")
 	void TryEnterCover();
 
 	UFUNCTION(BlueprintCallable, Category = "Cover")	
 	void ExitCover();
-
 
 	UFUNCTION(BlueprintCallable, Category = "Cover")
 	void MoveAlongCover(float Value);
@@ -38,8 +39,16 @@ private:
 
 	ACharacter* OwnerCharacter;
 
+	// Variáveis para movimento fluído
+	bool bMovingToCover;
+	FVector TargetLocation;
+	FRotator TargetRotation;
+
 	UPROPERTY(EditAnywhere, Category = "Cover")
 	float CoverMovementSpeed = 300.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Cover")
+	float CoverTransitionSpeed = 200.0f;
 
 	void AlignToCover();
 	bool FindCover(FVector& OutLocation, FVector& OutNormal);
