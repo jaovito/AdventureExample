@@ -55,10 +55,10 @@ void UCoverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
     }
 }
 
-void UCoverComponent::TryEnterCover() 
+bool UCoverComponent::TryEnterCover() 
 {
     if (CurrentState != ECoverState::None || bMovingToCover)
-        return;
+        return false;
 
 	FVector Location;
     FVector Normal;
@@ -68,7 +68,10 @@ void UCoverComponent::TryEnterCover()
         CoverLocation = Location;
         CoverNormal = Normal;
         AlignToCover();
+	    return true;
 	}
+
+    return false;
 }
 
 void UCoverComponent::ExitCover()
@@ -91,7 +94,7 @@ bool UCoverComponent::FindCover(FVector& OutLocation, FVector& OutNormal)
 {
     const FVector Start = OwnerCharacter->GetActorLocation();
     const FVector Forward = OwnerCharacter->GetActorForwardVector();
-    const FVector End = Start + Forward * 150.0f;
+    const FVector End = Start + Forward * CoverCheckDistance;
 
     FHitResult Hit;
     FCollisionQueryParams Params;

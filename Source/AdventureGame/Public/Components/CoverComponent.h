@@ -17,7 +17,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable, Category = "Cover")
-	void TryEnterCover();
+	bool TryEnterCover();
 
 	UFUNCTION(BlueprintCallable, Category = "Cover")	
 	void ExitCover();
@@ -30,6 +30,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Cover")
+	float CoverCheckDistance = 150.0f;
 
 private:
 	ECoverState CurrentState;
