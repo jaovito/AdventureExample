@@ -100,8 +100,11 @@ bool UCoverComponent::FindCover(FVector& OutLocation, FVector& OutNormal)
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(OwnerCharacter);
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+    const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+    const FColor DebugColor = bHit && Hit.bBlockingHit ? FColor::Green : FColor::Red;
 
+    DrawDebugLine(GetWorld(), Start, End, DebugColor, false, 1.0f);
+    
     if (bHit && Hit.bBlockingHit)
     {
         OutLocation = Hit.ImpactPoint;
@@ -156,7 +159,7 @@ void UCoverComponent::MoveAlongCover(float Value)
     // Verifica se ainda há parede na frente no próxima posição do player
     // Adiciona um offset na direção do movimento para detectar a borda antes
     FVector TraceStart = NewLocation + (MoveDirection.GetSafeNormal() * 50.0f); // 50cm à frente na direção do movimento
-    FVector TraceEnd = TraceStart + (-CoverNormal * 150.0f); // Usa a direção perpendicular à parede
+    FVector TraceEnd = TraceStart + (-CoverNormal * 60.0f); // Usa a direção perpendicular à parede
     
     FHitResult Hit;
     FCollisionQueryParams Params;
