@@ -28,12 +28,12 @@ void UCoverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
     
     if (bMovingToCover && OwnerCharacter)
     {
-        // Calcula a direção para o alvo
+        // Calculate the direction and distance to the target cover location
         FVector CurrentLocation = OwnerCharacter->GetActorLocation();
         FVector Direction = (TargetLocation - CurrentLocation);
         float Distance = Direction.Size();
         
-        // Se chegou perto o suficiente do alvo
+        // Check if the character is close enough to the cover
         if (Distance < 10.0f)
         {
             bMovingToCover = false;
@@ -43,11 +43,11 @@ void UCoverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
         }
         else
         {
-            // Move na direção do alvo usando AddMovementInput
+            // Move the character towards the cover
             Direction.Normalize();
             OwnerCharacter->AddMovementInput(Direction, 1.0f);
             
-            // Rotação suave para o alvo
+            // Smoothly rotate the character towards the cover
             FRotator CurrentRotation = OwnerCharacter->GetActorRotation();
             FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, DeltaTime, 5.0f);
             OwnerCharacter->SetActorRotation(NewRotation);
@@ -86,7 +86,7 @@ void UCoverComponent::ExitCover()
         
 		UCharacterMovementComponent* OwnerMovement = OwnerCharacter->GetCharacterMovement();
         OwnerMovement->SetMovementMode(EMovementMode::MOVE_Walking);
-        // OwnerCharacter->PlayCoverExitMontage(); // opcional
+        // OwnerCharacter->PlayCoverExitMontage(); // optional
     }
 }
 
@@ -117,17 +117,14 @@ bool UCoverComponent::FindCover(FVector& OutLocation, FVector& OutNormal)
 
 void UCoverComponent::AlignToCover()
 {
-    const FVector Forward = -CoverNormal; // olhando para a parede
+    const FVector Forward = -CoverNormal;
     const FRotator TargetRot = Forward.Rotation();
 
-    // Define a posição e rotação alvo
-    TargetLocation = CoverLocation - Forward * 50.0f; // ajusta distância
+    // Set the character's rotation to face the cover
+    TargetLocation = CoverLocation - Forward * 50.0f;
     TargetRotation = TargetRot;
     
-    // Inicia o movimento fluído
     bMovingToCover = true;
-    
-    // Garante que o Tick esteja ativo
     PrimaryComponentTick.bCanEverTick = true;
 }
 
@@ -141,23 +138,23 @@ void UCoverComponent::MoveAlongCover(float Value)
     if (CurrentState != ECoverState::InCover || Value == 0.0f || bMovingToCover)
         return;
 
-    // Calcula a direção paralela à parede usando o produto vetorial
+    // Calculate the right direction along the wall using the cover normal
     FVector Up = FVector::UpVector;
     FVector WallRight = FVector::CrossProduct(CoverNormal, Up);
     WallRight.Normalize();
 
-    // Aplica o valor de input na direção correta
+    // Apply the movement direction based on the input value
     FVector MoveDirection = WallRight * Value;
     
-    // Usa a velocidade de cobertura
+    // Use the CoverMovementSpeed to determine the speed of movement
     float Speed = CoverMovementSpeed * GetWorld()->GetDeltaSeconds();
     
-    // Calcula a nova posição
+    // Get the current location of the character and calculate the new location
     FVector CurrentLocation = OwnerCharacter->GetActorLocation();
     FVector NewLocation = CurrentLocation + (MoveDirection * Speed);
     
-    // Verifica se ainda há parede na frente no próxima posição do player
-    // Adiciona um offset na direção do movimento para detectar a borda antes
+    // Verify if there is a wall ahead
+    // Add an offset to the start of the trace to avoid hitting the character itself
     FVector TraceStart = NewLocation + (MoveDirection.GetSafeNormal() * 50.0f); // 50cm à frente na direção do movimento
     FVector TraceEnd = TraceStart + (-CoverNormal * 60.0f); // Usa a direção perpendicular à parede
     
@@ -171,16 +168,16 @@ void UCoverComponent::MoveAlongCover(float Value)
     FColor TraceColor = bHasWallAhead ? FColor::Green : FColor::Red;
     DrawDebugLine(GetWorld(), TraceStart, TraceEnd, TraceColor, false, 0.1f, 0, 2.0f);
     
-    // Se não há parede à frente, não se move
+    // If there is no wall ahead, do not move
     if (!bHasWallAhead)
     {
         return;
     }
     
-    // Move o personagem
+    // Move the character along the wall
     OwnerCharacter->AddMovementInput(WallRight, Value * Speed);
     
-    // // Atualiza a rotação para sempre olhar para a parede
+    // // Update the character's rotation to face the wall
     // FRotator TargetRot = (-CoverNormal).Rotation();
     // OwnerCharacter->SetActorRotation(TargetRot);
 }
